@@ -14,13 +14,16 @@ namespace State
 {
     States state = States::st_white;
 
+    Timer buttonPress;
+    Timer shutdown;
+
+
     void stateDriver()
     {
         uint16_t functionPotValue = Hardware::potFunction.get();
         uint16_t brightnessValue = map(Hardware::potBrightness.get(), 0, 1024, 1, 255);
 
-        if(Hardware::button.getEdgePos())
-            changeState();
+        buttonHandler();
 
 
         switch (State::state)
@@ -57,9 +60,37 @@ namespace State
     }
 
 
-    void changeState()
+    void buttonHandler()
     {
-        state = static_cast<States>((static_cast<uint8_t>(state) + 1) % static_cast<uint8_t>(States::NUM_STATES));
+        if(Hardware::button.getEdgePos())
+            buttonPress.start();
+
+        if(Hardware::button.getEdgeNeg())
+        {
+            if(buttonPress.elapsed(OFF_TIMER_START_DURATION))
+                timerStartSequence();
+            else
+                state = static_cast<States>((static_cast<uint8_t>(state) + 1) % static_cast<uint8_t>(States::NUM_STATES));
+
+            buttonPress.stop();
+        }
+    }
+
+
+    void timerStartSequence()
+    {
+        const uint8_t currentBrightness = map(Hardware::potBrightness.get(), 0, 1024, 1, 255);
+
+        for(uint8_t i = currentBrightness; i > 0; i--)
+        {
+            Hardware::strip.setBrightness(i);
+            delay(3);
+        }
+        for(uint8_t i = currentBrightness; i < currentBrightness; i++)
+        {
+            Hardware::strip.setBrightness(i);
+            delay(3);
+        }
     }
 
 } // namespace State

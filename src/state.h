@@ -18,8 +18,11 @@ namespace State
         NUM_STATES
     };
 
-    /// @brief change state handler
-    void changeState();
+    /// @brief button handler for state change, and timer
+    void buttonHandler();
+
+    /// @brief Sequence to illustrate the starting of timer
+    void timerStartSequence();
 
     /// @brief State driver function
     void stateDriver();
