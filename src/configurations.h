@@ -1,10 +1,11 @@
 // =============================================================================
-// Template-Project | Configurations
+// Arduino-LED-Strip-Controller | Configurations
 // =============================================================================
 
-#ifndef _TEMPLATE_PROJECT_CONFIGURATIONS_
-#define _TEMPLATE_PROJECT_CONFIGURATIONS_
+#ifndef _LED_STRIP_CONTROLLER_CONFIGURATIONS_
+#define _LED_STRIP_CONTROLLER_CONFIGURATIONS_
 
+// LED Strip parameters
+#define NUM_LIGHTS      43
 
-
-#endif // _TEMPLATE_PROJECT_CONFIGURATIONS_
+#endif // _LED_STRIP_CONTROLLER_CONFIGURATIONS_

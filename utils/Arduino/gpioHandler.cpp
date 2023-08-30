@@ -4,22 +4,22 @@
 
 #include "gpioHandler.h"
 
-bool GPIO::getPort(Hardware::Port port)
+bool GPIO::getPort(uint8_t port)
 {
     return digitalRead((uint8_t)port);
 }
 
-uint16_t GPIO::getAnalogPort(Hardware::Port port)
+uint16_t GPIO::getAnalogPort(uint8_t port)
 {
     return analogRead((uint8_t)port);
 }
 
-void GPIO::setPort(Hardware::Port port, bool value)
+void GPIO::setPort(uint8_t port, bool value)
 {
     digitalWrite((uint8_t)port, value);
 }
 
-void GPIO::setAnalogPort(Hardware::Port port, uint8_t value)
+void GPIO::setAnalogPort(uint8_t port, uint8_t value)
 {
     analogWrite((uint8_t)port, value);
 }
