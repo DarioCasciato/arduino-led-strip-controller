@@ -24,6 +24,9 @@ namespace State
     /// @brief Sequence to illustrate the starting of timer
     void timerStartSequence();
 
+    /// @brief Sequence is called when timer hit timer
+    void shutdownSequence();
+
     /// @brief State driver function
     void stateDriver();
 } // namespace State

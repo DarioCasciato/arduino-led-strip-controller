@@ -21,7 +21,8 @@ namespace State
     void stateDriver()
     {
         uint16_t functionPotValue = Hardware::potFunction.get();
-        uint16_t brightnessValue = map(Hardware::potBrightness.get(), 0, 1024, 1, 255);
+        uint16_t brightnessValue = map(Hardware::potBrightness.get(),
+                                       0, 1024, 1, 255);
 
         buttonHandler();
 
@@ -50,7 +51,24 @@ namespace State
                 break;
         }
 
+        if(shutdown.elapsed(SHUTDOWN_TIME))
+        {
+            shutdownSequence();
+            shutdown.stop();
+
+            while(true)
+            {
+                Hardware::updateHardware();
+                EdgeDetection::updateEdges();
+
+                if(Hardware::button.getEdgePos())
+                    break;
+            }
+        }
+
         Hardware::strip.setBrightness(brightnessValue);
+
+
 
         return;
 
@@ -59,6 +77,7 @@ namespace State
             for(;;) {}
     }
 
+//------------------------------------------------------------------------------
 
     void buttonHandler()
     {
@@ -68,9 +87,13 @@ namespace State
         if(Hardware::button.getEdgeNeg())
         {
             if(buttonPress.elapsed(OFF_TIMER_START_DURATION))
+            {
                 timerStartSequence();
+                shutdown.start();
+            }
             else
-                state = static_cast<States>((static_cast<uint8_t>(state) + 1) % static_cast<uint8_t>(States::NUM_STATES));
+                state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
+                        static_cast<uint8_t>(States::NUM_STATES));
 
             buttonPress.stop();
         }
@@ -79,7 +102,8 @@ namespace State
 
     void timerStartSequence()
     {
-        const uint8_t currentBrightness = map(Hardware::potBrightness.get(), 0, 1024, 1, 255);
+        const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
+                                              0, 1024, 1, 255);
 
         for(uint8_t i = currentBrightness; i > 0; i--)
         {
@@ -90,6 +114,19 @@ namespace State
         {
             Hardware::strip.setBrightness(i);
             delay(3);
+        }
+    }
+
+
+    void shutdownSequence()
+    {
+        const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
+                                              0, 1024, 1, 255);
+
+        for(uint8_t i = currentBrightness; i > 0; i--)
+        {
+            Hardware::strip.setBrightness(i);
+            delay(50);
         }
     }
 
