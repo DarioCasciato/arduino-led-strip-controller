@@ -52,7 +52,7 @@ namespace State
         }
 
         if(shutdown.elapsed(SHUTDOWN_TIME))
-        {
+        {   // turn this into a own mode
             shutdownSequence();
             shutdown.stop();
 
