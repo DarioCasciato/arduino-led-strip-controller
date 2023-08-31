@@ -7,16 +7,16 @@
 #ifndef ARDUINO_OBJECTS_POTENTIOMETER_
 #define ARDUINO_OBJECTS_POTENTIOMETER_
 
+enum Direction
+{
+    UP,
+    DOWN
+};
+
 class Potentiometer
 {
 
 public:
-    enum Direction
-    {
-        UP,
-        DOWN
-    };
-
     /// @brief Potentiometer constructor
     ///
     /// @param pin The analog pin connected to the potentiometer
