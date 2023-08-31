@@ -7,18 +7,14 @@
 #ifndef ARDUINO_OBJECTS_POTENTIOMETER_
 #define ARDUINO_OBJECTS_POTENTIOMETER_
 
+enum Direction
+{
+    UP,
+    DOWN
+};
+
 class Potentiometer
 {
-    enum Direction
-    {
-        UP,
-        DOWN
-    };
-
-private:
-    uint8_t _pin;
-    uint16_t _lastValue;
-    Direction _direction;
 
 public:
     /// @brief Potentiometer constructor
@@ -36,6 +32,11 @@ public:
     ///
     /// @return The current percentage value of the potentiometer (0-100)
     uint8_t getPercentage();
+
+private:
+    uint8_t _pin;
+    uint16_t _lastValue;
+    Direction _direction;
 };
 
 #endif // ARDUINO_OBJECTS_POTENTIOMETER_

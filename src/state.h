@@ -1,9 +1,9 @@
 // =============================================================================
-// Template-Project | State
+// Arduino-LED-Strip-Controller | State
 // =============================================================================
 
-#ifndef _TEMPLATE_PROJECT_STATE_
-#define _TEMPLATE_PROJECT_STATE_
+#ifndef _LED_STRIP_CONTROLLER_STATE_
+#define _LED_STRIP_CONTROLLER_STATE_
 
 #include "hardware.h"
 
@@ -11,18 +11,24 @@ namespace State
 {
     enum States : uint8_t
     {
-        st_idle,
-        st_error
+        st_white,
+        st_colorpick,
+        st_cycle,
+        st_fire,
+        NUM_STATES
     };
+
+    /// @brief button handler for state change, and timer
+    void buttonHandler();
+
+    /// @brief Sequence to illustrate the starting of timer
+    void timerStartSequence();
+
+    /// @brief Sequence is called when timer hit timer
+    void shutdownSequence();
 
     /// @brief State driver function
     void stateDriver();
-
-    /// @brief Handler for the Idle state
-    void stateIdle();
-
-    /// @brief Handler for the Error state
-    void stateError();
 } // namespace State
 
-#endif // _TEMPLATE_PROJECT_STATE_
+#endif // _LED_STRIP_CONTROLLER_STATE_
