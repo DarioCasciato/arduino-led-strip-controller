@@ -48,8 +48,8 @@ namespace
 void Mode::white(uint16_t functionValue)
 {
     const uint8_t whiteIndex = map(functionValue, 0, 1023, 0, 110);
-    const uint32_t outputColor = Hardware::strip.Color(arrayRed[whiteIndex],
-                                                       arrayGreen[whiteIndex],
+    const uint32_t outputColor = Hardware::strip.Color(arrayGreen[whiteIndex],
+                                                       arrayRed[whiteIndex],
                                                        arrayBlue[whiteIndex]);
 
     for (uint8_t i = 0; i < NUM_LIGHTS; i++)
