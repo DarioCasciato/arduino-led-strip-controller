@@ -99,7 +99,7 @@ namespace State
         }
     }
 
-
+    // indicates that the timer has been acitvated (gets dark and then again bright)
     void timerStartSequence()
     {
         const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
@@ -119,7 +119,7 @@ namespace State
         }
     }
 
-
+    // if timer elapsed, led strip gets dark
     void shutdownSequence()
     {
         const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
