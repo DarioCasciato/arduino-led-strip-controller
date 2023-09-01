@@ -10,7 +10,6 @@
 namespace
 {
     Timer rainbowTimer;
-    uint32_t lastUpdate = 0;
     uint8_t currentColorIndex = 0;
 }
 
