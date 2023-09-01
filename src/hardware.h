@@ -17,11 +17,11 @@ namespace Hardware
     // Example entries
     enum class Port : uint8_t
     {
-        PotFunction         = (uint8_t) GPIO::Port::A3,
-        PotBrightness       = (uint8_t) GPIO::Port::A4,
-        MicrophoneIn        = (uint8_t) GPIO::Port::A5,
-        Button              = (uint8_t) GPIO::Port::D2,
-        Strip               = (uint8_t) GPIO::Port::D4
+        PotFunction         = static_cast<uint8_t>(GPIO::Port::A3),
+        PotBrightness       = static_cast<uint8_t>(GPIO::Port::A4),
+        MicrophoneIn        = static_cast<uint8_t>(GPIO::Port::A5),
+        Button              = static_cast<uint8_t>(GPIO::Port::D2),
+        Strip               = static_cast<uint8_t>(GPIO::Port::D4)
     };
 
 
