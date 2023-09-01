@@ -6,36 +6,52 @@
 #include "../ColorUtilities/color_utilities.h"
 #include "hardware.h"
 #include "gpioHandler.h"
+#include "Timer.h"  // Include the Timer header if it's not already included
 
+//! Mode currently not supported!
+
+namespace
+{
+    Timer audioTimer;  // Create a timer object
+}
 
 void fillDefinedColors()
 {
-    // Fill 1/6 with blue
-    for (uint8_t i = 0; i < (NUM_LEDS / 6); i++)
-        Hardware::leds[i] = CRGB::DeepSkyBlue;
+    uint8_t index = 247;
 
-    // Fill next 3/6 with green
-    for (uint8_t i = (NUM_LEDS / 6); i < (NUM_LEDS / 2) + (NUM_LEDS / 6); i++)
-        Hardware::leds[i] = CRGB::LimeGreen;
-
-    // Fill next 1/6 with yellow
-    for (uint8_t i = (NUM_LEDS / 2) + (NUM_LEDS / 6); i < 5 * (NUM_LEDS / 6); i++)
-        Hardware::leds[i] = CRGB::Yellow;
-
-    // Fill remaining 1/6 with red
-    for (uint8_t i = 5 * (NUM_LEDS / 6); i < NUM_LEDS; i++)
-        Hardware::leds[i] = CRGB::Red;
+    for (int i = NUM_LEDS - 1; i >= 0; --i) {
+        Hardware::leds[i] = Color::getColorValue(index);
+        index = (index + 3) % 256;  // Increase the color index by the step value
+    }
 }
 
-
-void Mode::audio(uint16_t functionValue)
+void Mode::audio(uint16_t functionValue, uint16_t audioValue)
 {
-    const uint8_t audioValue = map(functionValue, 0, 1024, 0, 255);
+    // If the timer hasn't started yet, start it
+    if (!audioTimer.elapsedStart()) {
+        audioTimer.start();
+    }
 
-    fillDefinedColors();
+    // If 80ms has elapsed, update the visualization
+    if (audioTimer.elapsed(20)) {
 
-    for (uint8_t i = audioValue; i < NUM_LEDS; i++)
-        Hardware::leds[i] = CRGB::Black;
+        uint16_t senseVal = map(functionValue, 0, 1023, 100, 8000);
+        uint8_t audioMapped = map(audioValue, 509, 1023, 100, senseVal);  // Added sensitivity adjustment
 
-    FastLED.show();
+        // Check if audioMapped exceeds the maximum value of 255
+        if(audioMapped > 255) {
+            audioMapped = 255;
+        }
+
+        fillDefinedColors();  // Fill the LEDs with default colors
+
+        // Turn off LEDs beyond the audio level
+        for (uint8_t i = audioMapped; i < NUM_LEDS; i++) {
+            Hardware::leds[i] = CRGB::Black;
+        }
+
+        Serial.println(audioValue);  // Debugging
+
+        audioTimer.start();  // Reset the timer for the next cycle
+    }
 }

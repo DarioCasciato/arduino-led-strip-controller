@@ -13,32 +13,29 @@ namespace
     uint8_t currentColorIndex = 0;
 }
 
-void Mode::rainbow(uint16_t functionValue)
+void Mode::rainbow(const uint16_t functionValue)
 {
-    // Map the function value to delay time
-    const uint8_t delayTime = map(functionValue, 0, 1023, 0, 255);
+    const uint8_t delayTime = map(functionValue, 0, 1023, 100, 0);
+    const uint8_t step = 3;  // Increment color by this step value for each LED
 
-    // Check if it's time to update the rainbow
-    if(rainbowTimer.elapsed(delayTime)) {
-
-        // Increment the color index
-        currentColorIndex = (currentColorIndex + 1) % 256;
-
-        for(int i = 0; i < NUM_LEDS; i+=2) {
-            // Calculate color for the current pixel based on the color index
-            CRGB color = Color::getColorValue((currentColorIndex + i) % 256);
-
-            // Set color for two adjacent pixels
-            Hardware::leds[i] = color;
-            if (i + 1 < NUM_LEDS) {
-                Hardware::leds[i + 1] = color;
-            }
-        }
-
-        // Push the new color data to the strip
-        FastLED.show();
-
-        // Reset the timer
+    // Ensure the timer has started
+    if (!rainbowTimer.elapsedStart()) {
         rainbowTimer.start();
     }
+
+    // Time to update the strip?
+    if (rainbowTimer.elapsed(delayTime)) {
+        currentColorIndex = (currentColorIndex + 1) % 256;  // Increment base color index
+
+        uint8_t index = currentColorIndex;  // Starting color index
+
+        // Reverse the loop direction
+        for (int i = NUM_LEDS - 1; i >= 0; --i) {
+            Hardware::leds[i] = Color::getColorValue(index);
+            index = (index + step) % 256;  // Increase the color index by the step value
+        }
+
+        rainbowTimer.start();  // Reset the timer
+    }
+
 }

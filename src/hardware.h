@@ -19,7 +19,7 @@ namespace Hardware
     {
         PotFunction         = static_cast<uint8_t>(GPIO::Port::A3),
         PotBrightness       = static_cast<uint8_t>(GPIO::Port::A4),
-        MicrophoneIn        = static_cast<uint8_t>(GPIO::Port::A5),
+        MicrophoneIn        = static_cast<uint8_t>(GPIO::Port::A6),
         Button              = static_cast<uint8_t>(GPIO::Port::D2),
         Strip               = static_cast<uint8_t>(GPIO::Port::D4)
     };

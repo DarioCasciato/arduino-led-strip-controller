@@ -21,7 +21,7 @@ namespace Mode {
 
     void rainbow(uint16_t functionValue);
 
-    void audio(uint16_t functionValue);
+    void audio(uint16_t functionValue, uint16_t audioValue);
 
 } // namespace Mode
 

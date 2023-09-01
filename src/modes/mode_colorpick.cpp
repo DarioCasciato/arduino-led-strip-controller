@@ -13,6 +13,4 @@ void Mode::colorpick(uint16_t functionValue)
 
     for (uint8_t i = 0; i < NUM_LEDS; i++)
         Hardware::leds[i] = outputColor;
-
-    FastLED.show();
 }

@@ -49,10 +49,6 @@ namespace State
                 Mode::rainbow(functionPotValue);
                 break;
 
-            case State::st_audio:
-                Mode::audio(Hardware::audioValue);
-                break;
-
             default:    // catch invalid state (implement safety backup)
             goto exception;
                 break;
@@ -73,6 +69,7 @@ namespace State
             }
         }
 
+        FastLED.show();
         FastLED.setBrightness(brightnessValue);
 
 
@@ -117,13 +114,13 @@ namespace State
         {
             FastLED.setBrightness(i);
             FastLED.show();
-            delay(3);
+            delay(1);
         }
-        for(uint8_t i = currentBrightness; i < currentBrightness; i++)
+        for(uint8_t i = 0; i < currentBrightness; i++)
         {
             FastLED.setBrightness(i);
             FastLED.show();
-            delay(3);
+            delay(1);
         }
     }
 
@@ -137,7 +134,13 @@ namespace State
         {
             FastLED.setBrightness(i);
             FastLED.show();
-            delay(50);
+            delay(150);
+
+            Hardware::updateHardware();
+            EdgeDetection::updateEdges();
+
+            if(Hardware::button.getEdgePos())
+                break;
         }
     }
 
