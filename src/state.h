@@ -15,6 +15,7 @@ namespace State
         st_colorpick,
         st_cycle,
         st_fire,
+        st_rainbow,
         NUM_STATES
     };
 
