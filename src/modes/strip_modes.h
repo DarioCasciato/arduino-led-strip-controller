@@ -19,6 +19,10 @@ namespace Mode {
 
     void fire(uint16_t functionValue);
 
+    void rainbow(uint16_t functionValue);
+
+    void audio(uint16_t functionValue, uint16_t audioValue);
+
 } // namespace Mode
 
 

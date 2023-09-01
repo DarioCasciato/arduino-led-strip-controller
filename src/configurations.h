@@ -12,6 +12,6 @@
 #define OFF_TIMER_START_DURATION    2500
 
 // Time til shutdown                v   Defines time in minutes
-#define SHUTDOWN_TIME               1 * 1000 * 60
+#define SHUTDOWN_TIME               30 * 1000 * 60
 
 #endif // _LED_STRIP_CONTROLLER_CONFIGURATIONS_
