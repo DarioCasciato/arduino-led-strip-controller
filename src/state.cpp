@@ -44,10 +44,13 @@ namespace State
             case State::st_fire:
                 Mode::fire(functionPotValue);
                 break;
-                break;
 
             case State::st_rainbow:
                 Mode::rainbow(functionPotValue);
+                break;
+
+            case State::st_audio:
+                Mode::audio(Hardware::audioValue);
                 break;
 
             default:    // catch invalid state (implement safety backup)

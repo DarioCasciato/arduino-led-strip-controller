@@ -28,6 +28,8 @@ namespace Hardware
     extern uint8_t buttonState;
     extern EdgeDetection button;
 
+    extern uint16_t audioValue;
+
     extern Potentiometer potFunction;
     extern Potentiometer potBrightness;
 
