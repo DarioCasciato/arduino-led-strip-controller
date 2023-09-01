@@ -49,7 +49,6 @@ void bootUpSequence()
                                           0, 1024, 1, 255);
 
     Mode::white(functionPotValue);
-    FastLED.show();
 
     for (uint8_t i = 0; i < currentBrightness; i++)
     {
