@@ -31,9 +31,9 @@ void Mode::fire(uint16_t functionValue)
   // Only update one LED at a time based on the currentLED index
   if (currentLED < NUM_LEDS) {
     int r = 255;
-    int g = 96;
+    int g = 75;
     int b = 12;
-    short flicker = random(8, 40);
+    short flicker = random(8, 50);
 
     short r1 = r - flicker;
     short g1 = g - flicker;
