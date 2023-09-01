@@ -48,13 +48,12 @@ namespace
 void Mode::white(uint16_t functionValue)
 {
     const uint8_t whiteIndex = map(functionValue, 0, 1023, 0, 110);
-    const uint32_t outputColor = Hardware::strip.Color(arrayRed[whiteIndex],
-                                                       arrayGreen[whiteIndex],
-                                                       arrayBlue[whiteIndex]);
+    const CRGB outputColor = CRGB(arrayGreen[whiteIndex],
+                                  arrayRed[whiteIndex],
+                                  arrayBlue[whiteIndex]);
 
-    for (uint8_t i = 0; i < NUM_LIGHTS; i++)
-    {
-        Hardware::strip.setPixelColor(i, outputColor);
-        Hardware::strip.show();
-    }
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+        Hardware::leds[i] = outputColor;
+
+    FastLED.show();
 }

@@ -3,6 +3,7 @@
 // =============================================================================
 
 #include <stdint.h>
+#include "FastLED.h"
 
 namespace Color
 {
@@ -14,5 +15,5 @@ namespace Color
     ///
     /// @param inputValue The input value to convert (0 to 255).
     /// @return The corresponding RGB color value.
-    uint32_t getColorValue(uint16_t inputValue);
+    CRGB getColorValue(uint16_t inputValue);
 } // namespace Color
