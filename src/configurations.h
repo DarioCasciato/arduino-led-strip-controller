@@ -6,7 +6,7 @@
 #define _LED_STRIP_CONTROLLER_CONFIGURATIONS_
 
 // LED Strip parameters
-#define NUM_LIGHTS                  43
+#define NUM_LEDS                    43
 
 // button press ime for Timer acivation (in ms)
 #define OFF_TIMER_START_DURATION    2500
