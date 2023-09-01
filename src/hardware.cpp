@@ -19,16 +19,13 @@ namespace Hardware
 
     Potentiometer potBrightness(static_cast<uint8_t>(Port::PotBrightness),
                                 Direction::UP);
-
-    Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LIGHTS,
-                                                static_cast<uint8_t>(Port::Strip),
-                                                NEO_RGB + NEO_KHZ800);
+  
+    CRGB leds[NUM_LEDS];
 
 
     void init()
     {
-        strip.begin();
-	    strip.show();
+        FastLED.addLeds<WS2811, (uint8_t)Port::Strip, GRB>(leds, NUM_LEDS);
     }
 
     void updateHardware()

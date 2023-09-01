@@ -3,10 +3,10 @@
 // =============================================================================
 
 #include "color_utilities.h"
-#include "Adafruit_NeoPixel.h"
+#include "FastLED.h"
 
 
-uint32_t Color::getColorValue(uint16_t inputValue)
+CRGB Color::getColorValue(uint16_t inputValue)
 {
     uint8_t red = 0;
     uint8_t green = 0;
@@ -55,5 +55,5 @@ uint32_t Color::getColorValue(uint16_t inputValue)
         blue = 255 - (inputValue - 212.5) * 6;
     }
 
-    return Adafruit_NeoPixel::Color(red, green, blue);
+    return CRGB(red, green, blue);
 }

@@ -66,8 +66,7 @@ namespace State
             }
         }
 
-        Hardware::strip.setBrightness(brightnessValue);
-
+        FastLED.setBrightness(brightnessValue);
 
 
         return;
@@ -107,12 +106,14 @@ namespace State
 
         for(uint8_t i = currentBrightness; i > 0; i--)
         {
-            Hardware::strip.setBrightness(i);
+            FastLED.setBrightness(i);
+            FastLED.show();
             delay(3);
         }
         for(uint8_t i = currentBrightness; i < currentBrightness; i++)
         {
-            Hardware::strip.setBrightness(i);
+            FastLED.setBrightness(i);
+            FastLED.show();
             delay(3);
         }
     }
@@ -125,7 +126,8 @@ namespace State
 
         for(uint8_t i = currentBrightness; i > 0; i--)
         {
-            Hardware::strip.setBrightness(i);
+            FastLED.setBrightness(i);
+            FastLED.show();
             delay(50);
         }
     }

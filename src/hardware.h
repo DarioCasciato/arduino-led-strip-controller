@@ -7,7 +7,7 @@
 
 #include "EdgeDetection.h"
 #include "Potentiometer.h"
-#include "Adafruit_NeoPixel.h"
+#include "FastLED.h"
 #include "configurations.h"
 #include "gpio.h"
 
@@ -31,7 +31,7 @@ namespace Hardware
     extern Potentiometer potFunction;
     extern Potentiometer potBrightness;
 
-    extern Adafruit_NeoPixel strip;
+    extern CRGB leds[NUM_LEDS];
 
 
     /// @brief Initializes hardware
