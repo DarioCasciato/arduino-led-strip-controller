@@ -44,6 +44,11 @@ namespace State
             case State::st_fire:
                 Mode::fire(functionPotValue);
                 break;
+                break;
+
+            case State::st_rainbow:
+                Mode::rainbow(functionPotValue);
+                break;
 
             default:    // catch invalid state (implement safety backup)
             goto exception;
