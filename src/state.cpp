@@ -45,7 +45,6 @@ namespace State
                 Mode::fire(functionPotValue);
                 break;
 
-
             default:    // catch invalid state (implement safety backup)
             goto exception;
                 break;
@@ -91,8 +90,10 @@ namespace State
                 shutdown.start();
             }
             else
+            {
                 state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
                         static_cast<uint8_t>(States::NUM_STATES));
+            }
 
             buttonPress.stop();
         }
