@@ -16,7 +16,7 @@ namespace
 }
 
 
-void fireMode(uint16_t functionValue)
+void Mode::fire(uint16_t functionValue)
 {
     // You might use functionValue for some parameterization, if needed
 
