@@ -95,6 +95,7 @@ namespace State
         {
             if(buttonPress.elapsed(OFF_TIMER_START_DURATION))
             {
+                timerStartSequence();
                 shutdown.start();
             }
             // If the button was pressed and released quickly, cycle through the
@@ -121,14 +122,14 @@ namespace State
         {
             FastLED.setBrightness(i);
             FastLED.show();
-            delay(1);
+            delay(3);
         }
         // Fade back in
         for(uint8_t i = 0; i < currentBrightness; i++)
         {
             FastLED.setBrightness(i);
             FastLED.show();
-            delay(1);
+            delay(3);
         }
 
         // Start the shutdown timer
