@@ -146,7 +146,7 @@ namespace State
         {
             FastLED.setBrightness(i);
             FastLED.show();
-            delay(150);
+            delay(200);
 
             // Check for button presses while fading
             Hardware::updateHardware();
