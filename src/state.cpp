@@ -49,13 +49,13 @@ namespace State
                 Mode::rainbow(functionPotValue);
                 break;
 
-            default:    // catch invalid state (implement safety backup)
+            default:
             goto exception;
                 break;
         }
 
         if(shutdown.elapsed(SHUTDOWN_TIME))
-        {   // turn this into a own mode
+        {
             shutdownSequence();
             shutdown.stop();
 
@@ -84,66 +84,79 @@ namespace State
 
     void buttonHandler()
     {
+        // If the button is pressed, start the buttonPress timer
         if(Hardware::button.getEdgePos())
             buttonPress.start();
 
+        // If the button is released and the buttonPress timer has been running
+        // for longer than the OFF_TIMER_START_DURATION, start the shutdown
+        // sequence
         if(Hardware::button.getEdgeNeg())
         {
             if(buttonPress.elapsed(OFF_TIMER_START_DURATION))
             {
-                timerStartSequence();
                 shutdown.start();
             }
+            // If the button was pressed and released quickly, cycle through the
+            // different states of the program
             else
             {
                 state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
                         static_cast<uint8_t>(States::NUM_STATES));
             }
 
+            // Stop the buttonPress timer
             buttonPress.stop();
         }
     }
 
-    // indicates that the timer has been acitvated (gets dark and then again bright)
     void timerStartSequence()
     {
+        // Get the current brightness from the potentiometer
         const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
                                               0, 1024, 1, 255);
 
+        // Fade out to black
         for(uint8_t i = currentBrightness; i > 0; i--)
         {
             FastLED.setBrightness(i);
             FastLED.show();
             delay(1);
         }
+        // Fade back in
         for(uint8_t i = 0; i < currentBrightness; i++)
         {
             FastLED.setBrightness(i);
             FastLED.show();
             delay(1);
         }
+
+        // Start the shutdown timer
+        shutdown.start();
     }
 
-    // if timer elapsed, led strip gets dark
     void shutdownSequence()
     {
+        // Get the current brightness from the potentiometer
         const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
                                               0, 1024, 1, 255);
 
+        // Fade out to black
         for(uint8_t i = currentBrightness; i > 0; i--)
         {
             FastLED.setBrightness(i);
             FastLED.show();
             delay(150);
 
+            // Check for button presses while fading
             Hardware::updateHardware();
             EdgeDetection::updateEdges();
 
+            // If the button is pressed, stop the shutdown timer
             if(Hardware::button.getEdgePos())
                 break;
         }
     }
-
 } // namespace State
 
 //------------------------------------------------------------------------------
