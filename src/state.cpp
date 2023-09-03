@@ -57,6 +57,10 @@ namespace State
         if(shutdown.elapsed(SHUTDOWN_TIME))
         {
             shutdownSequence();
+
+            FastLED.clear();
+            FastLED.show();
+
             shutdown.stop();
 
             while(true)
