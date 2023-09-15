@@ -14,60 +14,25 @@ This Arduino LED Strip Controller is a versatile project that allows you to cont
 
 Here's a brief overview of the project's file structure:
 
-```
-├───src
-│ │ configurations.h
-│ │ hardware.cpp
-│ │ hardware.h
-│ │ main.cpp
-│ │ state.cpp
-│ │ state.h
-│ │
-│ ├───ColorUtilities
-│ │ color_utilities.cpp
-│ │ color_utilities.h
-│ │
-│ └───modes
-│ mode_audio.cpp
-│ mode_colorpick.cpp
-│ mode_cycle.cpp
-│ mode_fire.cpp
-│ mode_rainbow.cpp
-│ mode_white.cpp
-│ strip_modes.h
-│
-└───utils
-├───Arduino
-│ gpio.h
-│ gpioHandler.cpp
-│ gpioHandler.h
-│
-├───Buzzer
-│ Buzzer.cpp
-│ Buzzer.h
-│
-├───EdgeDetection
-│ EdgeDetection.cpp
-│ EdgeDetection.h
-│
-├───LED
-│ LED.cpp
-│ LED.h
-│ LED_RGB.cpp
-│ LED_RGB.h
-│
-├───Potentiometer
-│ Potentiometer.cpp
-│ Potentiometer.h
-│
-├───Security
-│ CRC16.cpp
-│ CRC16.h
-│
-└───Timer
-Timer.cpp
-Timer.h
-```
+- src/
+
+  - configurations.h
+  - hardware.cpp
+  - hardware.h
+  - main.cpp
+  - state.cpp
+  - state.h
+  - ColorUtilities/
+    - color_utilities.cpp
+    - color_utilities.h
+  - modes/
+    - mode_audio.cpp
+    - mode_colorpick.cpp
+    - mode_cycle.cpp
+    - mode_fire.cpp
+    - mode_rainbow.cpp
+    - mode_white.cpp
+    - strip_modes.h
 
 
 ## Getting Started
