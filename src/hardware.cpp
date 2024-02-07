@@ -15,6 +15,7 @@ namespace Hardware
     EdgeDetection button(&buttonState);
 
     uint16_t audioValue = 0;
+    MAX4466 mic(static_cast<uint8_t>(Port::MicrophoneIn));
 
     Potentiometer potFunction(static_cast<uint8_t>(Port::PotFunction),
                               Direction::UP);

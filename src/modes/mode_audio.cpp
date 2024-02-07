@@ -6,52 +6,53 @@
 #include "../ColorUtilities/color_utilities.h"
 #include "hardware.h"
 #include "gpioHandler.h"
-#include "Timer.h"  // Include the Timer header if it's not already included
-
-//! Mode currently not supported!
+#include "Timer.h"
 
 namespace
 {
-    Timer audioTimer;  // Create a timer object
+    Timer audioTimer;  // Utilize a timer object for managing update intervals
 }
 
 void fillDefinedColors()
 {
     uint8_t index = 247;
 
-    for (int i = NUM_LEDS - 1; i >= 0; --i) {
+    for (int i = NUM_LEDS - 1; i >= 0; --i)
+    {
         Hardware::leds[i] = Color::getColorValue(index);
-        index = (index + 3) % 256;  // Increase the color index by the step value
+        index = (index + 3) % 256;  // Increment the color index
     }
 }
 
 void Mode::audio(uint16_t functionValue, uint16_t audioValue)
 {
-    // If the timer hasn't started yet, start it
-    if (!audioTimer.elapsedStart()) {
+    // Start the timer if it hasn't been started
+    if (!audioTimer.elapsedStart())
         audioTimer.start();
-    }
 
-    // If 80ms has elapsed, update the visualization
-    if (audioTimer.elapsed(20)) {
-
+    // Update the LEDs every 20ms
+    if (audioTimer.elapsed(20))
+    {
+        // Map functionValue to adjust the sensitivity range
         uint16_t senseVal = map(functionValue, 0, 1023, 100, 8000);
-        uint8_t audioMapped = map(audioValue, 509, 1023, 100, senseVal);  // Added sensitivity adjustment
+        // Map audioValue to LED indices, incorporating sensitivity
+        uint8_t audioMapped = map(audioValue, 509, 1023, 0, NUM_LEDS * (senseVal / 8000.0));  // Adjust the mapping as needed
 
-        // Check if audioMapped exceeds the maximum value of 255
-        if(audioMapped > 255) {
-            audioMapped = 255;
-        }
+        // Ensure audioMapped does not exceed the number of LEDs
+        audioMapped = min(audioMapped, static_cast<uint8_t>(NUM_LEDS));
 
-        fillDefinedColors();  // Fill the LEDs with default colors
+        fillDefinedColors();  // Fill the strip with predefined colors
 
-        // Turn off LEDs beyond the audio level
-        for (uint8_t i = audioMapped; i < NUM_LEDS; i++) {
+        // Turn off LEDs that are beyond the current audio level
+        for (uint8_t i = audioMapped; i < NUM_LEDS; i++)
+        {
             Hardware::leds[i] = CRGB::Black;
         }
 
-        Serial.println(audioValue);  // Debugging
+        // Debug: Output the raw audio value
+        Serial.println(audioValue);
 
-        audioTimer.start();  // Reset the timer for the next cycle
+        // Reset the timer for the next update cycle
+        audioTimer.start();
     }
 }

@@ -49,6 +49,10 @@ namespace State
                 Mode::rainbow(functionPotValue);
                 break;
 
+            case State::st_audio:
+                Mode::audio(functionPotValue, Hardware::mic.getVolume());
+                break;
+
             default:
             goto exception;
                 break;

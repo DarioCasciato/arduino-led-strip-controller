@@ -10,6 +10,7 @@
 #include "FastLED.h"
 #include "configurations.h"
 #include "gpio.h"
+#include "MAX4466.h"
 
 
 namespace Hardware
@@ -29,6 +30,7 @@ namespace Hardware
     extern EdgeDetection button;
 
     extern uint16_t audioValue;
+    extern MAX4466 mic;
 
     extern Potentiometer potFunction;
     extern Potentiometer potBrightness;
