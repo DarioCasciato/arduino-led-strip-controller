@@ -31,12 +31,12 @@ void Mode::audio(uint16_t functionValue, uint16_t audioValue)
         audioTimer.start();
 
     // Update the LEDs every 20ms
-    if (audioTimer.elapsed(20))
+    if (audioTimer.elapsed(80))
     {
         // Map functionValue to adjust the sensitivity range
-        uint16_t senseVal = map(functionValue, 0, 1023, 100, 8000);
+        // uint16_t senseVal = map(functionValue, 0, 1023, 100, 8000);
         // Map audioValue to LED indices, incorporating sensitivity
-        uint8_t audioMapped = map(audioValue, 509, 1023, 0, NUM_LEDS * (senseVal / 8000.0));  // Adjust the mapping as needed
+        uint8_t audioMapped = map(audioValue, 0, 1023, 0, NUM_LEDS);  // Adjust the mapping as needed
 
         // Ensure audioMapped does not exceed the number of LEDs
         audioMapped = min(audioMapped, static_cast<uint8_t>(NUM_LEDS));
@@ -50,7 +50,7 @@ void Mode::audio(uint16_t functionValue, uint16_t audioValue)
         }
 
         // Debug: Output the raw audio value
-        Serial.println(audioValue);
+        Serial.println(audioMapped);
 
         // Reset the timer for the next update cycle
         audioTimer.start();

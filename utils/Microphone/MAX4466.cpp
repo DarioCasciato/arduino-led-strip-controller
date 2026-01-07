@@ -18,7 +18,22 @@ uint16_t MAX4466::getRaw()
 
 uint16_t MAX4466::getVolume()
 {
-    uint16_t raw = getRaw();
-    uint16_t volume = abs(raw - 512); // Assuming 512 is the midpoint for 0-1023 range
-    return map(volume, 0, 512, 0, 100); // Map the volume to a more useful range (e.g., 0-100)
+    uint16_t rawValue = analogRead(_pin); // Read the raw analog value
+    uint16_t rectifiedValue;
+
+    if(rawValue < 256){
+        // If the value is below the 256, flip it
+        rectifiedValue = (256 - (rawValue - 256));
+    } else {
+        // If the value is above the 256, keep it as it is
+        rectifiedValue = rawValue;
+    }
+
+    // Subtract the 256 to center around 0V
+    uint16_t centeredValue = rectifiedValue - 256;
+
+    // Ensure the volume is within 0 to 1023
+    uint16_t volumeValue = constrain(centeredValue, 0, 1023);
+
+    return volumeValue;
 }
