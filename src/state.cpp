@@ -155,6 +155,9 @@ namespace State
 
     void buttonHandler()
     {
+        if(state == States::st_fortnite)
+            return;
+
         // If the button is pressed, start the buttonPress timer
         if(Hardware::button.getEdgePos())
             buttonPress.start();

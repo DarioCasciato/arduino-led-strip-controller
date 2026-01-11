@@ -8,7 +8,7 @@
 // LED Strip parameters
 #define NUM_LEDS                    43
 
-#define DEBUG_SERIAL              1   // Enable(1)/Disable(0) debug serial output
+// #define DEBUG_SERIAL              1   // Enable(1)/Disable(0) debug serial output
 
 // button press ime for Timer acivation (in ms)
 #define OFF_TIMER_START_DURATION    2500

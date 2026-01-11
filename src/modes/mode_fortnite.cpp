@@ -17,8 +17,11 @@ enum Events : uint8_t
     e_kill,
     e_assist,
     e_death,
+    e_gameEnd,
     e_downed,
     e_revived,
+    e_fullShield,
+    e_fullHealth,
     NUM_EVENTS
 };
 
@@ -28,12 +31,11 @@ enum Stages : uint8_t
     st_battleBus,
     st_freefall,
     st_inGame,
-    st_inStorm,
     NUM_STAGES
 };
 
 //------------------------------------------------------------------------------
-// Internal State
+// Internal values
 //------------------------------------------------------------------------------
 
 namespace
@@ -52,6 +54,38 @@ namespace
 
     // Defaults
     const CRGB defaultColor = CRGB(44, 77, 143);
+
+//---------------------------------------------------
+
+    // Battle Bus state
+    Timer battleBusTimer;
+    CRGB battleBusColors[NUM_LEDS];
+    bool battleBusInitialized = false;
+
+    // Freefall state
+    Timer freefallTimer;
+    uint8_t freefallLedBrightness[NUM_LEDS];  // Individual brightness for each LED
+    bool freefallInitialized = false;
+    const CRGB freefallColor = CRGB(44, 77, 143);
+
+//---------------------------------------------------
+
+    // Fade effect
+    Timer fadeTimer;
+    CRGB fadeStartColor = CRGB::Black;
+    CRGB fadeEndColor = CRGB::Black;
+    uint32_t fadeDuration = 0;
+    bool fadeActive = false;
+
+    // Expanding effect
+    Timer expandTimer;
+    CRGB expandColor = CRGB::Black;
+    CRGB expandBackgroundColor = CRGB::Black;
+    uint32_t expandDuration = 0;
+    bool expandActive = false;
+
+//---------------------------------------------------
+
 }
 
 //------------------------------------------------------------------------------
@@ -67,19 +101,22 @@ void renderLobby(uint16_t functionValue);
 void renderBattleBus(uint16_t functionValue);
 void renderFreefall(uint16_t functionValue);
 void renderInGame(uint16_t functionValue);
-void renderInStorm(uint16_t functionValue);
 
 // Event renderers
-void renderEventInStorm();
 void renderEventKill();
 void renderEventAssist();
 void renderEventDeath();
+void renderEventGameEnd();
 void renderEventDowned();
 void renderEventRevived();
+void renderEventFullShield();
+void renderEventFullHealth();
+
 void checkSerialInput();
 
 // Helpers
 void fillStripColor(const CRGB& color);
+bool fadeColor(const CRGB& startColor, const CRGB& endColor, uint32_t durationMs, bool forceRestart = false);
 
 void logMsg(const char* msg)
 {
@@ -207,10 +244,6 @@ void processStage(uint16_t functionValue)
             renderInGame(functionValue);
             break;
 
-        case st_inStorm:
-            renderInStorm(functionValue);
-            break;
-
         default:
             // Fallback: default color
             fillStripColor(defaultColor);
@@ -238,12 +271,24 @@ void processEvent()
             renderEventDeath();
             break;
 
+        case e_gameEnd:
+            renderEventGameEnd();
+            break;
+
         case e_downed:
             renderEventDowned();
             break;
 
         case e_revived:
             renderEventRevived();
+            break;
+
+        case e_fullShield:
+            renderEventFullShield();
+            break;
+
+        case e_fullHealth:
+            renderEventFullHealth();
             break;
 
         default:
@@ -264,24 +309,94 @@ void renderLobby(uint16_t functionValue)
 
 void renderBattleBus(uint16_t functionValue)
 {
-    fillStripColor(CRGB(0, 102, 204)); // Blue color
+    // Initialize or reset every 500ms
+    if (!battleBusInitialized || battleBusTimer.elapsed(500))
+    {
+        battleBusTimer.start();
+        battleBusInitialized = true;
+
+        // Generate random colors for each LED
+        for (uint8_t i = 0; i < NUM_LEDS; i++)
+        {
+            // 20% chance for yellow, 80% for blue tones
+            if (random(100) < 20)
+            {
+                // Yellow
+                battleBusColors[i] = CRGB(255, 255, 0);
+            }
+            else
+            {
+                // Random blue tones
+                uint8_t blueShade = random(150, 255);
+                battleBusColors[i] = CRGB(0, random(50, 150), blueShade);
+            }
+        }
+    }
+
+    // Calculate brightness fade (from 100% to 0% over 500ms)
+    uint32_t elapsed = battleBusTimer.elapsedStart();
+    float progress = (float)elapsed / 500.0f;  // 0.0 to 1.0
+    uint8_t brightness = 255 - (uint8_t)(255 * progress);  // 255 to 0
+
+    // Apply colors with fading brightness
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    {
+        Hardware::leds[i] = battleBusColors[i];
+        Hardware::leds[i].nscale8(brightness);  // Scale brightness
+    }
 }
 
 void renderFreefall(uint16_t functionValue)
 {
-    //grey color
-    fillStripColor(CRGB(128, 128, 128));
+    // Initialize brightness array
+    if (!freefallInitialized)
+    {
+        for (uint8_t i = 0; i < NUM_LEDS; i++)
+        {
+            freefallLedBrightness[i] = random(50, 150);  // Random starting brightness
+        }
+        freefallInitialized = true;
+        freefallTimer.start();
+    }
+
+    // Every 100ms, update sparkles (slower than battlebus)
+    if (freefallTimer.elapsed(100))
+    {
+        freefallTimer.start();
+
+        for (uint8_t i = 0; i < NUM_LEDS; i++)
+        {
+            // Random chance to trigger new sparkle (10% chance)
+            if (random(100) < 10 && freefallLedBrightness[i] < 200)
+            {
+                freefallLedBrightness[i] = 255;  // Full brightness!
+            }
+            else
+            {
+                // Fade down slowly
+                if (freefallLedBrightness[i] > 30)
+                {
+                    freefallLedBrightness[i] -= random(3, 8);  // Slower fade
+                }
+                else
+                {
+                    freefallLedBrightness[i] = random(20, 40);  // Keep minimal brightness
+                }
+            }
+        }
+    }
+
+    // Apply color with individual brightness
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    {
+        Hardware::leds[i] = freefallColor;
+        Hardware::leds[i].nscale8(freefallLedBrightness[i]);
+    }
 }
 
 void renderInGame(uint16_t functionValue)
 {
-    fillStripColor(CRGB(0, 153, 76)); // Green color
-}
-
-void renderInStorm(uint16_t functionValue)
-{
-    // Fill strip with storm color (dark purple)
-    fillStripColor(CRGB(51, 0, 102));
+    fillStripColor(defaultColor);
 }
 
 //------------------------------------------------------------------------------
@@ -289,64 +404,179 @@ void renderInStorm(uint16_t functionValue)
 //------------------------------------------------------------------------------
 
 
-
 void renderEventKill()
 {
-    // Flash red on kill
-    fillStripColor(CRGB(255, 0, 0));
-
-    // End event after short duration
-    if (eventTimer.elapsed(500)) // 500 ms
+    // Phase 1: Fade to green (250ms)
+    if (eventAnimationStep == 0)
     {
-        eventActive = false;
+        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 250, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;  // Next phase
+        }
+    }
+    // Phase 2: Fade back (2000ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 2000, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
     }
 }
 
 void renderEventAssist()
 {
-    // Flash yellow on assist
-    fillStripColor(CRGB(255, 255, 0));
-
-    // End event after short duration
-    if (eventTimer.elapsed(500)) // 500 ms
+    // Phase 1: Fade to lightgreen (250ms)
+    if (eventAnimationStep == 0)
     {
-        eventActive = false;
+        bool phase1Done = fadeColor(defaultColor, CRGB::LightGreen, 250, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;  // Next phase
+        }
+    }
+    // Phase 2: Fade back (1000ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::LightGreen, defaultColor, 1000, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
     }
 }
 
-void renderEventDeath()
+void renderEventDeath() // only in team mode
 {
-    // Flash black on death
-    fillStripColor(CRGB(0, 0, 0));
-
-    // End event after short duration
-    if (eventTimer.elapsed(1000)) // 1000 ms
+    // Phase 1: Fade to red (250ms)
+    if (eventAnimationStep == 0)
     {
-        eventActive = false;
+        bool phase1Done = fadeColor(defaultColor, CRGB::Red, 250, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;  // Next phase
+        }
+    }
+    // Phase 2: Fade back (2000ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 2000, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
+    }
+}
+
+void renderEventGameEnd()
+{
+    // Phase 1: Expand red from center (2000ms)
+    if (eventAnimationStep == 0)
+    {
+        bool phase1Done = expandFromCenter(CRGB::Red, CRGB::Black, 2000, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;
+        }
+    }
+    // Phase 2: Fade to default color (4000ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 4000, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
     }
 }
 
 void renderEventDowned()
 {
-    // Flash blue on downed
-    fillStripColor(CRGB(0, 0, 255));
-
-    // End event after short duration
-    if (eventTimer.elapsed(700)) // 700 ms
+    // Phase 1: Fade to yellow (250ms)
+    if (eventAnimationStep == 0)
     {
-        eventActive = false;
+        bool phase1Done = fadeColor(defaultColor, CRGB::Yellow, 250, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;
+        }
+    }
+    // Phase 2: Fade back to default (1000ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::Yellow, defaultColor, 1000, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
     }
 }
 
 void renderEventRevived()
 {
-    // Flash green on revived
-    fillStripColor(CRGB(0, 255, 0));
-
-    // End event after short duration
-    if (eventTimer.elapsed(700)) // 700 ms
+    // Phase 1: Expand light blue from center (2000ms)
+    if (eventAnimationStep == 0)
     {
-        eventActive = false;
+        bool phase1Done = expandFromCenter(CRGB::LightBlue, CRGB::Black, 2000, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;
+        }
+    }
+    // Phase 2: Fade to default color (4000ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::LightBlue, defaultColor, 4000, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
+    }
+}
+
+void renderEventFullShield()
+{
+    // Phase 1: Fade to light blue (250ms)
+    if (eventAnimationStep == 0)
+    {
+        bool phase1Done = fadeColor(defaultColor, CRGB::LightBlue, 250, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;
+        }
+    }
+    // Phase 2: Fade back to default (500ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::LightBlue, defaultColor, 500, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
+    }
+}
+
+void renderEventFullHealth()
+{
+    // Phase 1: Fade to green (250ms)
+    if (eventAnimationStep == 0)
+    {
+        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 250, true);
+        if (phase1Done)
+        {
+            eventAnimationStep = 1;  // Next phase
+        }
+    }
+    // Phase 2: Fade back (500ms)
+    else if (eventAnimationStep == 1)
+    {
+        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 500, true);
+        if (phase2Done)
+        {
+            eventActive = false;
+        }
     }
 }
 
@@ -359,4 +589,106 @@ void fillStripColor(const CRGB& color)
 {
     for (uint8_t i = 0; i < NUM_LEDS; i++)
         Hardware::leds[i] = color;
+}
+
+
+// Fade between two colors over time (non-blocking)
+// Returns: true if fade is complete, false if still fading
+// forceRestart: if true, interrupts current fade and starts new one
+bool fadeColor(const CRGB& startColor, const CRGB& endColor, uint32_t durationMs, bool forceRestart = false)
+{
+    // Check if parameters changed (new fade requested while one is running)
+    bool parametersChanged = (startColor != fadeStartColor ||
+                              endColor != fadeEndColor ||
+                              durationMs != fadeDuration);
+
+    // Start new fade if: not active, force restart, or parameters changed
+    if (!fadeActive || forceRestart || parametersChanged)
+    {
+        fadeStartColor = startColor;
+        fadeEndColor = endColor;
+        fadeDuration = durationMs;
+        fadeActive = true;
+        fadeTimer.start();
+    }
+
+    uint32_t elapsed = fadeTimer.elapsedStart();
+
+    // Fade complete?
+    if (elapsed >= fadeDuration)
+    {
+        fillStripColor(fadeEndColor);
+        fadeActive = false;
+        fadeTimer.stop();
+        return true;  // Done!
+    }
+
+    // Calculate progress (0.0 to 1.0)
+    float progress = (float)elapsed / (float)fadeDuration;
+
+    // Linear interpolation between colors
+    uint8_t r = fadeStartColor.r + (fadeEndColor.r - fadeStartColor.r) * progress;
+    uint8_t g = fadeStartColor.g + (fadeEndColor.g - fadeStartColor.g) * progress;
+    uint8_t b = fadeStartColor.b + (fadeEndColor.b - fadeStartColor.b) * progress;
+
+    CRGB currentColor = CRGB(r, g, b);
+    fillStripColor(currentColor);
+
+    return false;  // Still fading
+}
+
+
+
+// Expand a color from center to edges
+// Returns: true if expansion is complete, false if still expanding
+bool expandFromCenter(const CRGB& color, const CRGB& backgroundColor, uint32_t durationMs, bool forceRestart = false)
+{
+    // Check if parameters changed
+    bool parametersChanged = (color != expandColor ||
+                              backgroundColor != expandBackgroundColor ||
+                              durationMs != expandDuration);
+
+    // Start new expansion if needed
+    if (!expandActive || forceRestart || parametersChanged)
+    {
+        expandColor = color;
+        expandBackgroundColor = backgroundColor;
+        expandDuration = durationMs;
+        expandActive = true;
+        expandTimer.start();
+    }
+
+    uint32_t elapsed = expandTimer.elapsedStart();
+
+    // Expansion complete?
+    if (elapsed >= expandDuration)
+    {
+        fillStripColor(expandColor);
+        expandActive = false;
+        expandTimer.stop();
+        return true;  // Done!
+    }
+
+    // Calculate progress (0.0 to 1.0)
+    float progress = (float)elapsed / (float)expandDuration;
+
+    // Calculate how many LEDs from center should be lit
+    uint8_t center = NUM_LEDS / 2;
+    uint8_t radius = (uint8_t)(center * progress);
+
+    // Fill strip with background color first
+    fillStripColor(expandBackgroundColor);
+
+    // Light up LEDs expanding from center
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    {
+        int8_t distanceFromCenter = abs((int8_t)i - (int8_t)center);
+
+        if (distanceFromCenter <= radius)
+        {
+            Hardware::leds[i] = expandColor;
+        }
+    }
+
+    return false;  // Still expanding
 }
