@@ -30,6 +30,9 @@ namespace State
     /// @brief Sequence to illustrate the starting of timer
     void timerStartSequence();
 
+    /// @brief Sequence to illustrate the exiting of fortnite mode
+    void exitFortnite();
+
     /// @brief Sequence is called when timer hit timer
     void shutdownSequence();
 

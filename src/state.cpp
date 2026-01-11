@@ -155,29 +155,46 @@ namespace State
 
     void buttonHandler()
     {
-        if(state == States::st_fortnite)
-            return;
-
         // If the button is pressed, start the buttonPress timer
         if(Hardware::button.getEdgePos())
             buttonPress.start();
 
-        // If the button is released and the buttonPress timer has been running
-        // for longer than the OFF_TIMER_START_DURATION, start the shutdown
-        // sequence
+        // If the button is released
         if(Hardware::button.getEdgeNeg())
         {
-            if(buttonPress.elapsed(OFF_TIMER_START_DURATION))
+            // --- Special handling when Fortnite mode is active ---
+            if(state == States::st_fortnite)
             {
-                timerStartSequence();
-                shutdown.start();
+                // If held long enough (3s), exit Fortnite and signalize
+                if(buttonPress.elapsed(FORTNITE_EXIT_DURATION))
+                {
+                    exitFortnite();
+
+                    // Restore previous state if it makes sense, otherwise fall back
+                    if(previousState == States::st_fortnite)
+                        state = States::st_white;
+                    else
+                        state = previousState;
+
+                    // Clear auto flag
+                    fortniteAutoActivated = false;
+                }
+                // Short press while in Fortnite -> do nothing
             }
-            // If the button was pressed and released quickly, cycle through the
-            // different states of the program
             else
             {
-                state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
-                        static_cast<uint8_t>(States::NUM_STATES));
+                // If held long enough, start the shutdown sequence
+                if(buttonPress.elapsed(OFF_TIMER_START_DURATION))
+                {
+                    timerStartSequence();
+                    shutdown.start();
+                }
+                // Short press -> cycle through program states
+                else
+                {
+                    state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
+                            static_cast<uint8_t>(States::NUM_STATES));
+                }
             }
 
             // Stop the buttonPress timer
@@ -208,6 +225,28 @@ namespace State
 
         // Start the shutdown timer
         shutdown.start();
+    }
+
+        void exitFortnite()
+    {
+        // Get the current brightness from the potentiometer
+        const uint8_t currentBrightness = map(Hardware::potBrightness.get(),
+                                              0, 1024, 1, 255);
+
+        // Fade out to black
+        for(uint8_t i = currentBrightness; i > 0; i--)
+        {
+            FastLED.setBrightness(i);
+            FastLED.show();
+            delay(3);
+        }
+        // Fade back in
+        for(uint8_t i = 0; i < currentBrightness; i++)
+        {
+            FastLED.setBrightness(i);
+            FastLED.show();
+            delay(3);
+        }
     }
 
     void shutdownSequence()

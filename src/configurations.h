@@ -13,6 +13,9 @@
 // button press ime for Timer acivation (in ms)
 #define OFF_TIMER_START_DURATION    2500
 
+// ms: hold duration to exit Fortnite mode
+#define FORTNITE_EXIT_DURATION      3000
+
 // Time til shutdown                v   Defines time in minutes
 const uint32_t SHUTDOWN_TIME =      30ULL * 1000ULL * 60ULL;
 

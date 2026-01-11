@@ -22,6 +22,7 @@ enum Events : uint8_t
     e_revived,
     e_fullShield,
     e_fullHealth,
+    e_win,
     NUM_EVENTS
 };
 
@@ -111,12 +112,14 @@ void renderEventDowned();
 void renderEventRevived();
 void renderEventFullShield();
 void renderEventFullHealth();
+void renderEventWin();
 
 void checkSerialInput();
 
 // Helpers
 void fillStripColor(const CRGB& color);
 bool fadeColor(const CRGB& startColor, const CRGB& endColor, uint32_t durationMs, bool forceRestart = false);
+bool expandFromCenter(const CRGB& color, const CRGB& backgroundColor, uint32_t durationMs, bool forceRestart = false);
 
 void logMsg(const char* msg)
 {
@@ -291,11 +294,13 @@ void processEvent()
             renderEventFullHealth();
             break;
 
+        case e_win:
+            renderEventWin();
+            break;
+
         default:
             break;
     }
-
-    eventAnimationStep++;
 }
 
 //------------------------------------------------------------------------------
@@ -333,10 +338,13 @@ void renderBattleBus(uint16_t functionValue)
         }
     }
 
-    // Calculate brightness fade (from 100% to 0% over 500ms)
+    // Calculate brightness fade (from 100% to 50% over 500ms)
     uint32_t elapsed = battleBusTimer.elapsedStart();
     float progress = (float)elapsed / 500.0f;  // 0.0 to 1.0
-    uint8_t brightness = 255 - (uint8_t)(255 * progress);  // 255 to 0
+    if (progress > 1.0f) progress = 1.0f; // clamp
+    const uint8_t startBrightness = 255;
+    const uint8_t endBrightness = 70; // ~50%
+    uint8_t brightness = startBrightness - (uint8_t)((startBrightness - endBrightness) * progress);  // 255 to 128
 
     // Apply colors with fading brightness
     for (uint8_t i = 0; i < NUM_LEDS; i++)
@@ -360,7 +368,7 @@ void renderFreefall(uint16_t functionValue)
     }
 
     // Every 100ms, update sparkles (slower than battlebus)
-    if (freefallTimer.elapsed(100))
+    if (freefallTimer.elapsed(50))
     {
         freefallTimer.start();
 
@@ -409,16 +417,16 @@ void renderEventKill()
     // Phase 1: Fade to green (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 250, true);
+        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 100);
         if (phase1Done)
         {
             eventAnimationStep = 1;  // Next phase
         }
     }
-    // Phase 2: Fade back (2000ms)
+    // Phase 2: Fade back (4000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 2000, true);
+        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 4000);
         if (phase2Done)
         {
             eventActive = false;
@@ -428,10 +436,10 @@ void renderEventKill()
 
 void renderEventAssist()
 {
-    // Phase 1: Fade to lightgreen (250ms)
+    // Phase 1: Fade to dark green (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::LightGreen, 250, true);
+        bool phase1Done = fadeColor(defaultColor, CRGB::DarkGreen, 100);
         if (phase1Done)
         {
             eventAnimationStep = 1;  // Next phase
@@ -440,7 +448,7 @@ void renderEventAssist()
     // Phase 2: Fade back (1000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::LightGreen, defaultColor, 1000, true);
+        bool phase2Done = fadeColor(CRGB::DarkGreen, defaultColor, 1000);
         if (phase2Done)
         {
             eventActive = false;
@@ -453,16 +461,16 @@ void renderEventDeath() // only in team mode
     // Phase 1: Fade to red (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Red, 250, true);
+        bool phase1Done = fadeColor(defaultColor, CRGB::Red, 100);
         if (phase1Done)
         {
             eventAnimationStep = 1;  // Next phase
         }
     }
-    // Phase 2: Fade back (2000ms)
+    // Phase 2: Fade back (4000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 2000, true);
+        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 4000);
         if (phase2Done)
         {
             eventActive = false;
@@ -472,10 +480,10 @@ void renderEventDeath() // only in team mode
 
 void renderEventGameEnd()
 {
-    // Phase 1: Expand red from center (2000ms)
+    // Phase 1: Expand red from center (4000ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = expandFromCenter(CRGB::Red, CRGB::Black, 2000, true);
+        bool phase1Done = expandFromCenter(CRGB::Red, CRGB::Black, 1000);
         if (phase1Done)
         {
             eventAnimationStep = 1;
@@ -484,7 +492,7 @@ void renderEventGameEnd()
     // Phase 2: Fade to default color (4000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 4000, true);
+        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 6000);
         if (phase2Done)
         {
             eventActive = false;
@@ -497,7 +505,7 @@ void renderEventDowned()
     // Phase 1: Fade to yellow (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Yellow, 250, true);
+        bool phase1Done = fadeColor(defaultColor, CRGB::Yellow, 100);
         if (phase1Done)
         {
             eventAnimationStep = 1;
@@ -506,7 +514,7 @@ void renderEventDowned()
     // Phase 2: Fade back to default (1000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Yellow, defaultColor, 1000, true);
+        bool phase2Done = fadeColor(CRGB::Yellow, defaultColor, 3000);
         if (phase2Done)
         {
             eventActive = false;
@@ -516,10 +524,10 @@ void renderEventDowned()
 
 void renderEventRevived()
 {
-    // Phase 1: Expand light blue from center (2000ms)
+    // Phase 1: Expand light blue from center (4000ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = expandFromCenter(CRGB::LightBlue, CRGB::Black, 2000, true);
+        bool phase1Done = expandFromCenter(CRGB(0x00, 0xc3, 0xff), CRGB::Black, 1000);
         if (phase1Done)
         {
             eventAnimationStep = 1;
@@ -528,7 +536,7 @@ void renderEventRevived()
     // Phase 2: Fade to default color (4000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::LightBlue, defaultColor, 4000, true);
+        bool phase2Done = fadeColor(CRGB(0x00, 0xc3, 0xff), defaultColor, 4000);
         if (phase2Done)
         {
             eventActive = false;
@@ -541,7 +549,7 @@ void renderEventFullShield()
     // Phase 1: Fade to light blue (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::LightBlue, 250, true);
+        bool phase1Done = fadeColor(defaultColor, CRGB(0x00, 0xc3, 0xff), 100);
         if (phase1Done)
         {
             eventAnimationStep = 1;
@@ -550,7 +558,7 @@ void renderEventFullShield()
     // Phase 2: Fade back to default (500ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::LightBlue, defaultColor, 500, true);
+        bool phase2Done = fadeColor(CRGB(0x00, 0xc3, 0xff), defaultColor, 1000);
         if (phase2Done)
         {
             eventActive = false;
@@ -563,7 +571,7 @@ void renderEventFullHealth()
     // Phase 1: Fade to green (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 250, true);
+        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 100);
         if (phase1Done)
         {
             eventAnimationStep = 1;  // Next phase
@@ -572,13 +580,179 @@ void renderEventFullHealth()
     // Phase 2: Fade back (500ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 500, true);
+        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 1000);
         if (phase2Done)
         {
             eventActive = false;
         }
     }
 }
+
+void renderEventWin()
+{
+    // Phase 1 to 3: same intro
+    if (eventAnimationStep == 0)
+    {
+        if (expandFromCenter(CRGB::Blue, CRGB::Black, 800)) eventAnimationStep = 1;
+        return;
+    }
+
+    if (eventAnimationStep == 1)
+    {
+        if (expandFromCenter(CRGB::Yellow, CRGB::Blue, 800)) eventAnimationStep = 2;
+        return;
+    }
+
+    if (eventAnimationStep == 2)
+    {
+        if (expandFromCenter(CRGB::Blue, CRGB::Yellow, 800)) eventAnimationStep = 3;
+        return;
+    }
+
+    if (eventAnimationStep == 3)
+    {
+        if (expandFromCenter(CRGB::Yellow, CRGB::Blue, 800)) eventAnimationStep = 4;
+        return;
+    }
+
+    if (eventAnimationStep == 4)
+    {
+        if (fadeColor(CRGB::Yellow, CRGB::Black, 800)) eventAnimationStep = 5;
+        return;
+    }
+
+    // Phase 4: simple fireworks (10s)
+    if (eventAnimationStep == 5)
+    {
+        static Timer fwTimer;
+        static Timer fwUpdate;
+        static bool fwInit = false;
+
+        static bool rocketActive = false;
+        static int16_t rocketPos = 0;
+        static int16_t rocketVel = 0;
+        static CRGB rocketColor = CRGB::White;
+
+        static uint8_t sparkLife[NUM_LEDS];   // brightness per LED for explosion
+        static CRGB sparkColor[NUM_LEDS];     // color per LED for explosion
+
+        if (!fwInit)
+        {
+            fwInit = true;
+            fwTimer.start();
+            fwUpdate.start();
+
+            for (uint16_t i = 0; i < NUM_LEDS; i++)
+            {
+                sparkLife[i] = 0;
+                sparkColor[i] = CRGB::Black;
+            }
+
+            rocketActive = true;
+            rocketPos = 0;
+            rocketVel = random(3, 7); // speed
+            rocketColor = CHSV(random8(), 255, 255);
+        }
+
+        if (fwUpdate.elapsed(25))
+        {
+            fwUpdate.start();
+
+            // global fade
+            for (uint16_t i = 0; i < NUM_LEDS; i++)
+            {
+                Hardware::leds[i].fadeToBlackBy(35);
+            }
+
+            // rocket rising
+            if (rocketActive)
+            {
+                rocketPos += rocketVel;
+                rocketVel -= 1; // gravity
+
+                if (rocketPos < 0) rocketPos = 0;
+                if (rocketPos > (int16_t)NUM_LEDS - 1) rocketPos = (int16_t)NUM_LEDS - 1;
+
+                Hardware::leds[rocketPos] += rocketColor;
+
+                // explode near top or when slowing down
+                if (rocketVel <= 0 || rocketPos >= (int16_t)NUM_LEDS - 2)
+                {
+                    rocketActive = false;
+
+                    // create explosion: set life for random positions around rocketPos
+                    for (uint8_t k = 0; k < 25; k++)
+                    {
+                        int16_t p = rocketPos + random(-10, 11);
+                        if (p < 0 || p >= (int16_t)NUM_LEDS) continue;
+
+                        sparkLife[p] = random(120, 255);
+                        sparkColor[p] = rocketColor;
+
+                        // little color variation
+                        sparkColor[p].nscale8(random(160, 255));
+                    }
+                }
+            }
+
+            // sparks: decay and render
+            bool anySpark = false;
+            for (uint16_t i = 0; i < NUM_LEDS; i++)
+            {
+                if (sparkLife[i] == 0) continue;
+
+                anySpark = true;
+
+                CRGB c = sparkColor[i];
+                c.nscale8(sparkLife[i]);
+                Hardware::leds[i] += c;
+
+                // decay
+                sparkLife[i] = (sparkLife[i] > 12) ? (sparkLife[i] - 12) : 0;
+
+                // optional tiny drift
+                if (sparkLife[i] > 0 && random8() < 30)
+                {
+                    int16_t j = (random8() < 128) ? (int16_t)i - 1 : (int16_t)i + 1;
+                    if (j >= 0 && j < (int16_t)NUM_LEDS && sparkLife[j] < sparkLife[i])
+                    {
+                        sparkLife[j] = sparkLife[i] - 5;
+                        sparkColor[j] = sparkColor[i];
+                    }
+                }
+            }
+
+            // start a new rocket when sparks are gone
+            if (!rocketActive && !anySpark)
+            {
+                rocketActive = true;
+                rocketPos = 0;
+                rocketVel = random(3, 8);
+                rocketColor = CHSV(random8(), 255, 255);
+            }
+
+            // if you dont call show() globally, enable this:
+            // FastLED.show();
+        }
+
+        if (fwTimer.elapsedStart() >= 15000)
+        {
+            eventAnimationStep = 6;
+            fwTimer.stop();
+            fwInit = false;
+        }
+        return;
+    }
+
+    // Phase 5: back to default
+    if (fadeColor(CRGB::Black, defaultColor, 2000))
+    {
+        eventActive = false;
+        currentStage = st_lobby; // back to lobby
+    }
+}
+
+
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -595,7 +769,7 @@ void fillStripColor(const CRGB& color)
 // Fade between two colors over time (non-blocking)
 // Returns: true if fade is complete, false if still fading
 // forceRestart: if true, interrupts current fade and starts new one
-bool fadeColor(const CRGB& startColor, const CRGB& endColor, uint32_t durationMs, bool forceRestart = false)
+bool fadeColor(const CRGB& startColor, const CRGB& endColor, uint32_t durationMs, bool forceRestart)
 {
     // Check if parameters changed (new fade requested while one is running)
     bool parametersChanged = (startColor != fadeStartColor ||
@@ -641,7 +815,7 @@ bool fadeColor(const CRGB& startColor, const CRGB& endColor, uint32_t durationMs
 
 // Expand a color from center to edges
 // Returns: true if expansion is complete, false if still expanding
-bool expandFromCenter(const CRGB& color, const CRGB& backgroundColor, uint32_t durationMs, bool forceRestart = false)
+bool expandFromCenter(const CRGB& color, const CRGB& backgroundColor, uint32_t durationMs, bool forceRestart)
 {
     // Check if parameters changed
     bool parametersChanged = (color != expandColor ||
