@@ -26,6 +26,7 @@ namespace State
         uint16_t brightnessValue = map(Hardware::potBrightness.get(),
                                        0, 1024, 1, 255);
 
+        checkForModeCommands();
         buttonHandler();
 
 
@@ -49,6 +50,10 @@ namespace State
 
             case State::st_rainbow:
                 Mode::rainbow(functionPotValue);
+                break;
+
+            case State::st_fortnite:
+                Mode::fortnite(functionPotValue);
                 break;
 
             default:
@@ -88,28 +93,28 @@ namespace State
 
 //------------------------------------------------------------------------------
 
+    void logMsg(const char* msg)
+    {
+    #if DEBUG_SERIAL
+        Serial.println(msg);
+    #endif
+    }
+
+
     void checkForModeCommands()
     {
-        if (Serial.available() == 0)
-        {
-            return;
-        }
+        if (Serial.available() == 0) return;
+        if (Serial.peek() != 'M') return;
 
-        if (Serial.peek() != 'M')
-        {
-            return;
-        }
-
-        Serial.read(); // consume 'M'
+        Serial.read();
+        logMsg("CMD M received");
 
         unsigned long startTime = millis();
-        while (Serial.available() < 1 && (millis() - startTime) < 100)
-        {
-
-        }
+        while (Serial.available() < 1 && (millis() - startTime) < 100) {}
 
         if (Serial.available() == 0)
         {
+            logMsg("CMD M timeout");
             return;
         }
 
@@ -119,12 +124,14 @@ namespace State
         {
             if (state == States::st_fortnite)
             {
+                logMsg("Fortnite mode already active");
                 return;
             }
 
             previousState = state;
             state = States::st_fortnite;
             fortniteAutoActivated = true;
+            logMsg("Fortnite mode activated");
             return;
         }
 
@@ -132,13 +139,16 @@ namespace State
         {
             if (state != States::st_fortnite || !fortniteAutoActivated)
             {
+                logMsg("Fortnite mode not active or not auto");
                 return;
             }
 
             state = previousState;
             fortniteAutoActivated = false;
+            logMsg("Fortnite mode deactivated");
         }
     }
+
 
 
 

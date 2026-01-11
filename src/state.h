@@ -21,6 +21,9 @@ namespace State
         NUM_STATES
     };
 
+    /// @brief Get mode activation/deactivation commands from serial
+    void checkForModeCommands();
+
     /// @brief button handler for state change, and timer
     void buttonHandler();
 

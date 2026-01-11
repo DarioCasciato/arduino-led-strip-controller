@@ -51,7 +51,7 @@ namespace
     uint8_t eventBrightness = 0;
 
     // Defaults
-    const CRGB defaultColor = CRGB(77, 40, 143);
+    const CRGB defaultColor = CRGB(44, 77, 143);
 }
 
 //------------------------------------------------------------------------------
@@ -81,6 +81,14 @@ void checkSerialInput();
 // Helpers
 void fillStripColor(const CRGB& color);
 
+void logMsg(const char* msg)
+{
+#if DEBUG_SERIAL
+    Serial.println(msg);
+#endif
+}
+
+
 //------------------------------------------------------------------------------
 // Main Mode Function
 //------------------------------------------------------------------------------
@@ -107,24 +115,28 @@ void Mode::fortnite(uint16_t functionValue)
 
 void checkSerialInput()
 {
-    if (Serial.available() == 0)
-    {
-        return;
-    }
+    if (Serial.available() == 0) return;
 
     uint8_t command = Serial.read();
 
-    // 'S' + stage_byte
     if (command == 'S')
     {
+        logMsg("CMD S received");
+
+        // WARTEN bis zweites Byte da ist
+        unsigned long startTime = millis();
+        while (Serial.available() < 1 && (millis() - startTime) < 100) {}
+
         if (Serial.available() == 0)
         {
+            logMsg("CMD S missing stage byte");
             return;
         }
 
         uint8_t stageValue = Serial.read();
         if (stageValue >= NUM_STAGES)
         {
+            logMsg("CMD S invalid stage");
             return;
         }
 
@@ -133,20 +145,29 @@ void checkSerialInput()
         Serial.write('A');
         Serial.write('S');
         Serial.write(stageValue);
+
+        logMsg("Stage set");
         return;
     }
 
-    // 'E' + event_byte
     if (command == 'E')
     {
+        logMsg("CMD E received");
+
+        // WARTEN bis zweites Byte da ist (HIER WAR DER FEHLER!)
+        unsigned long startTime = millis();
+        while (Serial.available() < 1 && (millis() - startTime) < 100) {}
+
         if (Serial.available() == 0)
         {
+            logMsg("CMD E missing event byte");
             return;
         }
 
         uint8_t eventValue = Serial.read();
         if (eventValue >= NUM_EVENTS)
         {
+            logMsg("CMD E invalid event");
             return;
         }
 
@@ -155,8 +176,11 @@ void checkSerialInput()
         eventTimer.start();
         eventAnimationStep = 0;
         eventBrightness = 0;
+
+        logMsg("Event triggered");
     }
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -181,6 +205,10 @@ void processStage(uint16_t functionValue)
 
         case st_inGame:
             renderInGame(functionValue);
+            break;
+
+        case st_inStorm:
+            renderInStorm(functionValue);
             break;
 
         default:
@@ -250,7 +278,7 @@ void renderInGame(uint16_t functionValue)
     fillStripColor(CRGB(0, 153, 76)); // Green color
 }
 
-void renderInStorm()
+void renderInStorm(uint16_t functionValue)
 {
     // Fill strip with storm color (dark purple)
     fillStripColor(CRGB(51, 0, 102));
