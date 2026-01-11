@@ -13,6 +13,8 @@
 namespace State
 {
     States state = States::st_white;
+    States previousState = States::st_white;  // Stores state before Fortnite mode
+    bool fortniteAutoActivated = false;        // Track if Fortnite was auto-activated
 
     Timer buttonPress;
     Timer shutdown;
@@ -85,6 +87,61 @@ namespace State
     }
 
 //------------------------------------------------------------------------------
+
+    void checkForModeCommands()
+    {
+        if (Serial.available() == 0)
+        {
+            return;
+        }
+
+        if (Serial.peek() != 'M')
+        {
+            return;
+        }
+
+        Serial.read(); // consume 'M'
+
+        unsigned long startTime = millis();
+        while (Serial.available() < 1 && (millis() - startTime) < 100)
+        {
+
+        }
+
+        if (Serial.available() == 0)
+        {
+            return;
+        }
+
+        uint8_t modeValue = Serial.read();
+
+        if (modeValue == 1)
+        {
+            if (state == States::st_fortnite)
+            {
+                return;
+            }
+
+            previousState = state;
+            state = States::st_fortnite;
+            fortniteAutoActivated = true;
+            return;
+        }
+
+        if (modeValue == 0)
+        {
+            if (state != States::st_fortnite || !fortniteAutoActivated)
+            {
+                return;
+            }
+
+            state = previousState;
+            fortniteAutoActivated = false;
+        }
+    }
+
+
+
 
     void buttonHandler()
     {

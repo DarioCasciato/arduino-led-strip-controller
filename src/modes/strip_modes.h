@@ -23,6 +23,8 @@ namespace Mode {
 
     void audio(uint16_t functionValue, uint16_t audioValue);
 
+    void fortnite(uint16_t functionValue);
+
 } // namespace Mode
 
 

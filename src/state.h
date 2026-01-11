@@ -17,6 +17,7 @@ namespace State
         st_fire,
         st_rainbow,
         //st_audio,
+        st_fortnite,
         NUM_STATES
     };
 
