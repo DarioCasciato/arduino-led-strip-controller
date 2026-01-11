@@ -727,7 +727,7 @@ void renderEventWin()
             {
                 rocketActive = true;
                 rocketPos = 0;
-                rocketVel = random(3, 8);
+                rocketVel = random(3, 10);
                 rocketColor = CHSV(random8(), 255, 255);
             }
 

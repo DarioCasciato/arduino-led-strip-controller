@@ -194,6 +194,12 @@ namespace State
                 {
                     state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
                             static_cast<uint8_t>(States::NUM_STATES));
+
+                    if(state == States::st_fortnite)
+                    {
+                        state = static_cast<States>((static_cast<uint8_t>(state) + 1) %
+                                static_cast<uint8_t>(States::NUM_STATES));
+                    }
                 }
             }
 
