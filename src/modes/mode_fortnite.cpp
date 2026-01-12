@@ -417,20 +417,14 @@ void renderEventKill()
     // Phase 1: Fade to green (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 100);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;  // Next phase
-        }
+        if(fadeColor(defaultColor, CRGB::Green, 100)) eventAnimationStep = 1;
+        return;
     }
     // Phase 2: Fade back (4000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 4000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB::Green, defaultColor, 4000)) eventActive = false;
+        return;
     }
 }
 
@@ -439,20 +433,14 @@ void renderEventAssist()
     // Phase 1: Fade to dark green (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::DarkGreen, 100);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;  // Next phase
-        }
+        if(fadeColor(defaultColor, CRGB::DarkGreen, 100)) eventAnimationStep = 1;
+        return;
     }
     // Phase 2: Fade back (1000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::DarkGreen, defaultColor, 1000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB::DarkGreen, defaultColor, 1000)) eventActive = false;
+        return;
     }
 }
 
@@ -461,42 +449,36 @@ void renderEventDeath() // only in team mode
     // Phase 1: Fade to red (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Red, 100);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;  // Next phase
-        }
+        if(fadeColor(defaultColor, CRGB::Red, 100)) eventAnimationStep = 1;
+        return;
     }
     // Phase 2: Fade back (4000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 4000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB::Red, defaultColor, 4000)) eventActive = false;
+        return;
     }
 }
 
 void renderEventGameEnd()
 {
-    // Phase 1: Expand red from center (4000ms)
-    if (eventAnimationStep == 0)
+    if(eventAnimationStep == 0)
     {
-        bool phase1Done = expandFromCenter(CRGB::Red, CRGB::Black, 1000);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;
-        }
+        if(fadeColor(defaultColor, CRGB::Black, 200)) eventAnimationStep = 1;
+        return;
+    }
+
+    // Phase 1: Expand red from center (4000ms)
+    if (eventAnimationStep == 1)
+    {
+        if(expandFromCenter(CRGB::Red, CRGB::Black, 1000)) eventAnimationStep = 2;
+        return;
     }
     // Phase 2: Fade to default color (4000ms)
-    else if (eventAnimationStep == 1)
+    else if (eventAnimationStep == 2)
     {
-        bool phase2Done = fadeColor(CRGB::Red, defaultColor, 6000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB::Red, defaultColor, 6000)) eventActive = false;
+        return;
     }
 }
 
@@ -505,42 +487,36 @@ void renderEventDowned()
     // Phase 1: Fade to yellow (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Yellow, 100);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;
-        }
+        if(fadeColor(defaultColor, CRGB::OrangeRed, 100)) eventAnimationStep = 1;
+        return;
     }
     // Phase 2: Fade back to default (1000ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Yellow, defaultColor, 3000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB::OrangeRed, defaultColor, 3000)) eventActive = false;
+        return;
     }
 }
 
 void renderEventRevived()
 {
-    // Phase 1: Expand light blue from center (4000ms)
-    if (eventAnimationStep == 0)
+    if(eventAnimationStep == 0)
     {
-        bool phase1Done = expandFromCenter(CRGB(0x00, 0xc3, 0xff), CRGB::Black, 1000);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;
-        }
+        if(fadeColor(defaultColor, CRGB::Black, 200)) eventAnimationStep = 1;
+        return;
+    }
+
+    // Phase 1: Expand light blue from center (4000ms)
+    if (eventAnimationStep == 1)
+    {
+        if(expandFromCenter(CRGB(0x00, 0xc3, 0xff), CRGB::Black, 1000)) eventAnimationStep = 2;
+        return;
     }
     // Phase 2: Fade to default color (4000ms)
-    else if (eventAnimationStep == 1)
+    else if (eventAnimationStep == 2)
     {
-        bool phase2Done = fadeColor(CRGB(0x00, 0xc3, 0xff), defaultColor, 4000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB(0x00, 0xc3, 0xff), defaultColor, 4000)) eventActive = false;
+        return;
     }
 }
 
@@ -549,20 +525,14 @@ void renderEventFullShield()
     // Phase 1: Fade to light blue (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB(0x00, 0xc3, 0xff), 100);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;
-        }
+        if(fadeColor(defaultColor, CRGB(0x00, 0xc3, 0xff), 100)) eventAnimationStep = 1;
+        return;
     }
     // Phase 2: Fade back to default (500ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB(0x00, 0xc3, 0xff), defaultColor, 1000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB(0x00, 0xc3, 0xff), defaultColor, 1000)) eventActive = false;
+        return;
     }
 }
 
@@ -571,58 +541,58 @@ void renderEventFullHealth()
     // Phase 1: Fade to green (250ms)
     if (eventAnimationStep == 0)
     {
-        bool phase1Done = fadeColor(defaultColor, CRGB::Green, 100);
-        if (phase1Done)
-        {
-            eventAnimationStep = 1;  // Next phase
-        }
+        if(fadeColor(defaultColor, CRGB::Green, 100)) eventAnimationStep = 1;
+        return;
     }
     // Phase 2: Fade back (500ms)
     else if (eventAnimationStep == 1)
     {
-        bool phase2Done = fadeColor(CRGB::Green, defaultColor, 1000);
-        if (phase2Done)
-        {
-            eventActive = false;
-        }
+        if(fadeColor(CRGB::Green, defaultColor, 1000)) eventActive = false;
+        return;
     }
 }
 
 void renderEventWin()
 {
-    // Phase 1 to 3: same intro
-    if (eventAnimationStep == 0)
+    if(eventAnimationStep == 0)
     {
-        if (expandFromCenter(CRGB::Blue, CRGB::Black, 800)) eventAnimationStep = 1;
+        if(fadeColor(defaultColor, CRGB::Black, 200)) eventAnimationStep = 1;
         return;
     }
 
+    // Phase 1 to 3: same intro
     if (eventAnimationStep == 1)
     {
-        if (expandFromCenter(CRGB::Yellow, CRGB::Blue, 800)) eventAnimationStep = 2;
+        if (expandFromCenter(CRGB::Blue, CRGB::Black, 800)) eventAnimationStep = 2;
         return;
     }
 
     if (eventAnimationStep == 2)
     {
-        if (expandFromCenter(CRGB::Blue, CRGB::Yellow, 800)) eventAnimationStep = 3;
+        if (expandFromCenter(CRGB::Yellow, CRGB::Blue, 800)) eventAnimationStep = 3;
         return;
     }
 
     if (eventAnimationStep == 3)
     {
-        if (expandFromCenter(CRGB::Yellow, CRGB::Blue, 800)) eventAnimationStep = 4;
+        if (expandFromCenter(CRGB::Blue, CRGB::Yellow, 800)) eventAnimationStep = 4;
         return;
     }
 
     if (eventAnimationStep == 4)
     {
-        if (fadeColor(CRGB::Yellow, CRGB::Black, 800)) eventAnimationStep = 5;
+        if (expandFromCenter(CRGB::Yellow, CRGB::Blue, 800)) eventAnimationStep = 5;
+        return;
+    }
+
+    if (eventAnimationStep == 5)
+    {
+        if (fadeColor(CRGB::Yellow, CRGB::Black, 800)) eventAnimationStep = 6;
         return;
     }
 
     // Phase 4: simple fireworks (10s)
-    if (eventAnimationStep == 5)
+    if (eventAnimationStep == 6)
     {
         static Timer fwTimer;
         static Timer fwUpdate;
@@ -737,7 +707,7 @@ void renderEventWin()
 
         if (fwTimer.elapsedStart() >= 15000)
         {
-            eventAnimationStep = 6;
+            eventAnimationStep = 7;
             fwTimer.stop();
             fwInit = false;
         }
@@ -745,10 +715,14 @@ void renderEventWin()
     }
 
     // Phase 5: back to default
-    if (fadeColor(CRGB::Black, defaultColor, 2000))
+    if (eventAnimationStep == 7)
     {
-        eventActive = false;
-        currentStage = st_lobby; // back to lobby
+        if (fadeColor(CRGB::Black, defaultColor, 2000))
+        {
+            eventActive = false;
+            currentStage = st_lobby; // back to lobby
+        }
+        return;
     }
 }
 
